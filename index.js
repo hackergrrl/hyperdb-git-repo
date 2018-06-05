@@ -17,10 +17,6 @@ module.exports = function (db) {
             name: node.key.replace('git/', ''),
             hash: node.value.toString()
           }
-        }),
-        pull.map(function (ref) {
-          debug('map', ref)
-          return ref
         })
       )
     },
@@ -37,7 +33,7 @@ module.exports = function (db) {
       debug('get', hash)
       db.get('git/objects/' + hash + '/info', function (err, nodes) {
         if (err) return cb(err)
-        if (!nodes.length) return cb({notFound:true})
+        if (!nodes.length) return cb(new Error({notFound:true}))
         var info = JSON.parse(nodes[0].value.toString())
         db.get('git/objects/' + hash + '/data', function (err, nodes) {
           if (err) return cb(err)
@@ -49,23 +45,53 @@ module.exports = function (db) {
     update: function (refs, objects, cb) {
       var refsDone = false
       var objsDone = false
+      var error
 
       pull(
         refs,
-        pull.drain(function (update) {
-          db.put('git/' + update.name, update.new, function () {
-            debug('update ref', update)
-          })
-        }, function () {
+        pull.asyncMap(function (update, done) {
+          if (update.old && !update.new) {
+            db.del('git/' + update.name, function () {
+              debug('delete ref', update)
+              done()
+            })
+          } else {
+            // don't let tags be double-pushed
+            if (/tags/.test(update.name)) {
+              db.get('git/' + update.name, function (err, nodes) {
+                if (err || nodes.length > 0) return done(err || {})
+                db.put('git/' + update.name, update.new, function () {
+                  debug('update ref', update)
+                  done()
+                })
+              })
+            } else {
+              db.put('git/' + update.name, update.new, function () {
+                debug('update ref', update)
+                done()
+              })
+            }
+          }
+        }),
+        pull.collect(function (err) {
+          error = err || error
           refsDone = true
-          if (refsDone && objsDone) cb()
+          debug('refs done', err)
+          if (refsDone && objsDone) cb(error)
         })
       )
+      
+      if (!objects) {
+        objsDone = true
+        debug('objs done')
+        if (refsDone && objsDone) cb(error)
+        return
+      }
 
       objects(null, function next(end, object) {
         if (end === true) {
           objsDone = true
-          if (refsDone && objsDone) cb()
+          if (refsDone && objsDone) cb(error)
           return
         }
         if (end) throw end
