@@ -15,6 +15,7 @@
   },
   "keywords": [],
   "dependencies": {
+    "debug": "^3.1.0",
     "hyperdb": "^3.1.1",
     "pull-git-remote-helper": "^2.0.0",
     "pull-hash": "^1.0.0",
@@ -22,8 +23,9 @@
     "stream-to-pull-stream": "^1.7.2"
   },
   "devDependencies": {
-    "tape": "~4.6.2",
-    "standard": "~10.0.0"
+    "abstract-pull-git-repo": "^0.4.1",
+    "standard": "~10.0.0",
+    "tape": "~4.6.2"
   },
   "license": "non-commercial"
 }
