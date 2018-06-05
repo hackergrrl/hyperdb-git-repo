@@ -2,7 +2,7 @@
   "name": "hyperdb-git-repo",
   "description": "git repo over a hyperdb",
   "author": "Stephen Whitmore <sww@eight.net>",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "repository": {
     "url": "git://github.com/noffle/hyperdb-git-repo.git"
   },
