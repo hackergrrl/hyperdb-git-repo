@@ -1,7 +1,6 @@
 var toPull = require('stream-to-pull-stream')
 var pull = require('pull-stream')
 var createGitHash = require('pull-hash/ext/git')
-var multicb = require('multicb')
 var debug = require('debug')('hyperdb-git-repo')
 
 module.exports = function (db) {
