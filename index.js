@@ -36,6 +36,7 @@ module.exports = function (db) {
       console.error('get', hash)
       db.get('git/objects/' + hash + '/info', function (err, nodes) {
         if (err) return cb(err)
+        if (!nodes.length) return cb({notFound:true})
         var info = JSON.parse(nodes[0].value.toString())
         db.get('git/objects/' + hash + '/data', function (err, nodes) {
           if (err) return cb(err)
