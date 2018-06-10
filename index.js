@@ -9,6 +9,10 @@ module.exports = function (db) {
       debug('want refs')
       return pull(
         toPull(db.createReadStream('git/refs', {recursive:true})),
+        pull.filter(function (nodes) {
+          if (!nodes || !nodes.length) return false
+          if (!nodes[0].value) return false
+        }),
         pull.map(function (nodes) {
           var node = nodes[0]
           debug('refs', node.key, node.value.toString())
