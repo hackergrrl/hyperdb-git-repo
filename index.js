@@ -12,6 +12,7 @@ module.exports = function (db) {
         pull.filter(function (nodes) {
           if (!nodes || !nodes.length) return false
           if (!nodes[0].value) return false
+          return true
         }),
         pull.map(function (nodes) {
           var node = nodes[0]
